@@ -1,82 +1,38 @@
-/*const { exec } = require('child_process');
+const fs = require('fs');
+const { execSync } = require('child_process');
 const Config = require('../Config');
 
 class DependencyManager {
-    static async checkCommand(command) {
-        return new Promise((resolve) => {
-            exec(`${command} --version`, (error) => {
-                resolve(!error);
-            });
-        });
-    }
+    static checkBinary(pathOrCommand) {
+        if (!pathOrCommand) return null;
 
-    static async locate() {
-        const ytdlp = Config.youtube.ytdlpPath || 'yt-dlp';
-        const ffmpeg = Config.youtube.ffmpegPath || 'ffmpeg';
-        const ffprobe = Config.youtube.ffprobePath || 'ffprobe';
+        try {
+            if (fs.existsSync(pathOrCommand)) {
+                fs.accessSync(pathOrCommand, fs.constants.X_OK);
+                return pathOrCommand;
+            }
+        } catch {}
 
-        const [hasYtdlp, hasFfmpeg, hasFfprobe] = await Promise.all([
-            this.checkCommand(ytdlp),
-            this.checkCommand(ffmpeg),
-            this.checkCommand(ffprobe)
-        ]);
-
-        return {
-            ytdlp: hasYtdlp ? ytdlp : null,
-            ffmpeg: hasFfmpeg ? ffmpeg : null,
-            ffprobe: hasFfprobe ? ffprobe : null
-        };
-    }
-}
-
-module.exports = DependencyManager;
-*/
-
-const { execFile } = require('child_process');
-const Config = require('../Config');
-
-class DependencyManager {
-    static checkCommand(command, versionArg = '--version') {
-        return new Promise((resolve) => {
-            execFile(command, [versionArg], { timeout: 5000 }, (error) => {
-                resolve(!error);
-            });
-        });
-    }
-
-    static async locateBinary(configured, command, versionArg = '--version') {
-        const candidate = configured || command;
-
-        if (await this.checkCommand(candidate, versionArg)) {
-            return candidate;
-        }
+        try {
+            const cmd = process.platform === 'win32' ? 'where' : 'command -v';
+            const result = execSync(`${cmd} ${pathOrCommand}`, { stdio: 'pipe' }).toString().trim();
+            
+            if (result) {
+                const firstResult = result.split(/\r?\n/)[0].trim();
+                if (fs.existsSync(firstResult)) {
+                    return firstResult;
+                }
+            }
+        } catch {}
 
         return null;
     }
 
     static async locate() {
-        const [ytdlp, ffmpeg, ffprobe] = await Promise.all([
-            this.locateBinary(
-                Config.youtube.ytdlpPath,
-                'yt-dlp',
-                '--version'
-            ),
-            this.locateBinary(
-                Config.youtube.ffmpegPath,
-                'ffmpeg',
-                '-version'
-            ),
-            this.locateBinary(
-                Config.youtube.ffprobePath,
-                'ffprobe',
-                '-version'
-            )
-        ]);
-
         return {
-            ytdlp,
-            ffmpeg,
-            ffprobe
+            ytdlp: this.checkBinary(Config.youtube.ytdlpPath || 'yt-dlp'),
+            ffmpeg: this.checkBinary(Config.youtube.ffmpegPath || 'ffmpeg'),
+            ffprobe: this.checkBinary(Config.youtube.ffprobePath || 'ffprobe')
         };
     }
 }
