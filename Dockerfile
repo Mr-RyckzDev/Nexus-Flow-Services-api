@@ -55,7 +55,10 @@ RUN mkdir -p \
         '' \
         'mkdir -p /app/config/yt-dlp' \
         '' \
-        'if [ -n "${YOUTUBE_COOKIES_CONTENT:-}" ]; then' \
+        'if [ -n "${YOUTUBE_COOKIES_BASE64:-}" ]; then' \
+        '    printf "%s" "$YOUTUBE_COOKIES_BASE64" | base64 -d > /app/config/yt-dlp/cookies.txt' \
+        '    chmod 600 /app/config/yt-dlp/cookies.txt' \
+        'elif [ -n "${YOUTUBE_COOKIES_CONTENT:-}" ]; then' \
         '    printf "%s" "$YOUTUBE_COOKIES_CONTENT" > /app/config/yt-dlp/cookies.txt' \
         '    chmod 600 /app/config/yt-dlp/cookies.txt' \
         'fi' \
