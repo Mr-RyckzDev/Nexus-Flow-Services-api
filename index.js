@@ -29,7 +29,7 @@ const bootstrap = async () => {
     logger.info(`- FFprobe: ${caps.dependencies.ffprobe ? '✓' : '✗'}`, 'BOOTSTRAP');
     logger.info(`Status: ${caps.ready ? 'READY' : 'DEGRADED'}`, 'BOOTSTRAP');
 
-    const server = app.listen(Config.server.port, () => {
+    const server = app.listen(Config.server.port, '0.0.0.0', () => {
         logger.info(`Server running in ${Config.server.env} mode`, 'BOOT');
         logger.info(`Port: ${Config.server.port}`, 'BOOT');
         logger.info(`Prefix: ${Config.server.apiPrefix}`, 'BOOT');
