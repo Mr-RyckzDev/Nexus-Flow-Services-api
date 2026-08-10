@@ -18,7 +18,7 @@ WORKDIR /app
 
 # 5. Instala as dependências do Node.js primeiro (aproveita cache de build)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # 6. Copia o código-fonte
 COPY . .
