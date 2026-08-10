@@ -13,6 +13,8 @@ const apiKeyAuth = require('./Middlewares/apiKeyAuth');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(cors({ origin: Config.security.corsOrigin }));
 app.use(express.json({ limit: Config.security.bodyLimit }));
