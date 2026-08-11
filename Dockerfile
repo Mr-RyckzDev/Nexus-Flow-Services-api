@@ -63,6 +63,11 @@ RUN mkdir -p \
         '    chmod 600 /app/config/yt-dlp/cookies.txt' \
         'fi' \
         '' \
+        'if [ -f /etc/secrets/cookies.txt ]; then' \
+        '    cp /etc/secrets/cookies.txt /app/config/yt-dlp/cookies.txt' \
+        '    chmod 600 /app/config/yt-dlp/cookies.txt' \
+        'fi' \
+        '' \
         'exec "$@"' \
         > /entrypoint.sh \
     && chmod 755 /entrypoint.sh
